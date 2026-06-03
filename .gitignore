@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+.claude/
+
+# Legacy folders from the full-stack version (replaced by the static app at root).
+# Safe to delete once your editor releases them.
+client/
+server/
