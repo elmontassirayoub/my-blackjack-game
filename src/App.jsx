@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from './api.js';
+import { loadLeaderboard, addScore } from './leaderboard.js';
 import Hand from './components/Hand.jsx';
 import Scoreboard from './components/Scoreboard.jsx';
 import BetControls from './components/BetControls.jsx';
+import Leaderboard from './components/Leaderboard.jsx';
+import SaveScore from './components/SaveScore.jsx';
 
 // Headline for a finished round, based on net chips won/lost.
 function outcomeMessage(net) {
@@ -17,6 +20,13 @@ export default function App() {
   const [bet, setBet] = useState(0); // pending bet during the betting phase
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [scores, setScores] = useState(() => loadLeaderboard()); // persistent leaderboard
+
+  // Save the current chip balance to the leaderboard under the given name.
+  function saveScore(playerName) {
+    if (!state) return;
+    setScores(addScore(playerName, state.balance));
+  }
 
   // Run an API call, syncing phase from the returned status.
   async function run(promise) {
@@ -110,6 +120,7 @@ export default function App() {
         ) : (
           <div className="controls controls--column">
             <p className="message message--lose">You’re out of chips!</p>
+            <SaveScore score={state.balance} onSave={saveScore} label="Save my run" />
             <button className="btn btn--new" onClick={() => run(api.newGame())} disabled={loading}>
               Start Over
             </button>
@@ -147,6 +158,13 @@ export default function App() {
       )}
 
       {!state && loading && <p className="message">Loading…</p>}
+
+      {state && (
+        <footer className="footer">
+          {state.balance > 0 && <SaveScore score={state.balance} onSave={saveScore} />}
+          <Leaderboard entries={scores} />
+        </footer>
+      )}
     </div>
   );
 }
